@@ -1,46 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bluetooth Device Scanner</title>
-</head>
-<body>
-    <h1>Bluetooth Device Scanner 3</h1>
-    <button id="onWatchAdvertisementsButtonClick">Scan for Devices</button>
-    <ul id="deviceList"></ul>
+---
+feature_name: Web Bluetooth / Watch Advertisements
+chrome_version: 87
+check_min_version: true
+feature_id: 5180688812736512
+icon_url: icon.png
+index: index.html
+---
 
-    <script>
-        document.getElementById('scanButton').addEventListener('click', async () => {
-            try {
-                const devices = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,
-                    optionalServices: ['heart_rate'] // Adjust the service UUID as needed
-                });
+{% include_relative _includes/intro.html %}
 
-                const deviceList = document.getElementById('deviceList');
-                deviceList.innerHTML = ''; // Clear previous entries
+<p>This sample illustrates the use of the Web Bluetooth API to read out
+advertisement data from nearby Bluetooth devices. You may want to check out the <a
+href="watch-advertisements-async-await.html">Watch Advertisements (Async Await)</a> sample.</p>
 
-                devices.forEach(device => {
-                    if (device.name && device.name.toUpperCase().startsWith('ACR')) {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = device.name;
-                        listItem.addEventListener('click', async () => {
-                            try {
-                                const server = await device.gatt.connect();
-                                // Now you can interact with the device's services and characteristics
-                                console.log('Connected to:', device.name);
-                            } catch (error) {
-                                console.error('Error connecting to device:', error);
-                            }
-                        });
-                        deviceList.appendChild(listItem);
-                    }
-                });
-            } catch (error) {
-                console.error('Error scanning for devices:', error);
-            }
-        });
-    </script>
-</body>
-</html>
+<button id="watchAdvertisements">Watch Advertisements</button>
+
+{% include output_helper.html %}
+
+{% include js_snippet.html filename='watch-advertisements.js' %}
+
+{% include_relative _includes/utils.html %}
+
+<script>
+  if (isWebBluetoothEnabled()) {
+    document.querySelector('#watchAdvertisements').addEventListener('click', function() {
+        onWatchAdvertisementsButtonClick();
+    });
+  }
+</script>
