@@ -1,7 +1,23 @@
-<p>
-  <button onclick="readBatteryLevel()">Read Bluetooth device's<br>battery level</button>
-</p>
-
-<p id="target"></p>
-
-<p><small>
+navigator.bluetooth.requestDevice({ filters: [{ services: ['heart_rate'] }] })
+  .then(device => {
+    // Device found, connect and read data
+    return device.gatt.connect();
+  })
+  .then(server => {
+    // Connected to GATT server, read characteristics
+    return server.getPrimaryService('heart_rate');
+  })
+  .then(service => {
+    // Get the heart rate characteristic
+    return service.getCharacteristic('heart_rate_measurement');
+  })
+  .then(characteristic => {
+    // Read the heart rate value
+    return characteristic.readValue();
+  })
+  .then(value => {
+    console.log('Heart rate:', value.getUint8(0));
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
