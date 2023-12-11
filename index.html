@@ -1,25 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web Bluetooth Example</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluetooth Device Scanner</title>
 </head>
 <body>
-  <button id="scanButton">Scan for Devices</button>
-  <script>
-    document.getElementById('scanButton').addEventListener('click', async () => {
-      try {
-        const device = await navigator.bluetooth.requestDevice({ filters: [{ services: ['ACR1255U-J1-026686'] }] });
-        const server = await device.gatt.connect();
-        const service = await server.getPrimaryService('heart_rate');
-        const characteristic = await service.getCharacteristic('heart_rate_measurement');
-        const value = await characteristic.readValue();
-        console.log('Heart rate:', value.getUint8(0));
-      } catch (error) {
-        console.error('Error:', error);
-      }
-    });
-  </script>
+    <h1>Bluetooth Device Scanner</h1>
+    <button id="scanButton">Scan for Devices</button>
+    <ul id="deviceList"></ul>
+
+    <script>
+        document.getElementById('scanButton').addEventListener('click', async () => {
+            try {
+                const devices = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['heart_rate'] // Adjust the service UUID as needed
+                });
+
+                const deviceList = document.getElementById('deviceList');
+                deviceList.innerHTML = ''; // Clear previous entries
+
+                devices.forEach(device => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = device.name || 'Unknown Device';
+                    listItem.addEventListener('click', async () => {
+                        try {
+                            const server = await device.gatt.connect();
+                            // Now you can interact with the device's services and characteristics
+                            console.log('Connected to:', device.name);
+                        } catch (error) {
+                            console.error('Error connecting to device:', error);
+                        }
+                    });
+                    deviceList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('Error scanning for devices:', error);
+            }
+        });
+    </script>
 </body>
 </html>
