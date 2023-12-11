@@ -1,31 +1,30 @@
-function readBatteryLevel() {
-  var $target = document.getElementById('target');
-  
-  if (!('bluetooth' in navigator)) {
-    $target.innerText = 'Bluetooth API not supported.';
-    return;
-  }
-  
-  navigator.bluetooth.requestDevice({
-      filters: [{
-        services: ['battery_service']
-      }]
-    })
-    .then(function (device) {
-      return device.gatt.connect();
-    })
-    .then(function (server) {
-      return server.getPrimaryService('battery_service');
-    })
-    .then(function (service) {
-      return service.getCharacteristic('battery_level');
-    })
-    .then(function (characteristic) {
-      return characteristic.readValue();
-    })
-    .then(function (value) {
-      $target.innerHTML = 'Battery percentage is ' + value.getUint8(0) + '.';
-    })
-    .catch(function (error) {
-      $target.innerText = error;
-    });
+document.getElementById('scanButton').addEventListener('click', async () => {
+    try {
+        const devices = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: ['heart_rate'] // Adjust the service UUID as needed
+        });
+
+        const deviceList = document.getElementById('deviceList');
+        deviceList.innerHTML = ''; // Clear previous entries
+
+        devices.forEach(device => {
+            if (device.name && device.name.toUpperCase().startsWith('ACR')) {
+                const listItem = document.createElement('li');
+                listItem.textContent = device.name;
+                listItem.addEventListener('click', async () => {
+                    try {
+                        const server = await device.gatt.connect();
+                        // Now you can interact with the device's services and characteristics
+                        console.log('Connected to:', device.name);
+                    } catch (error) {
+                        console.error('Error connecting to device:', error);
+                    }
+                });
+                deviceList.appendChild(listItem);
+            }
+        });
+    } catch (error) {
+        console.error('Error scanning for devices:', error);
+    }
+});
