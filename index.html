@@ -1,23 +1,25 @@
-navigator.bluetooth.requestDevice({ filters: [{ services: ['heart_rate'] }] })
-  .then(device => {
-    // Device found, connect and read data
-    return device.gatt.connect();
-  })
-  .then(server => {
-    // Connected to GATT server, read characteristics
-    return server.getPrimaryService('heart_rate');
-  })
-  .then(service => {
-    // Get the heart rate characteristic
-    return service.getCharacteristic('heart_rate_measurement');
-  })
-  .then(characteristic => {
-    // Read the heart rate value
-    return characteristic.readValue();
-  })
-  .then(value => {
-    console.log('Heart rate:', value.getUint8(0));
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Bluetooth Example</title>
+</head>
+<body>
+  <button id="scanButton">Scan for Devices</button>
+  <script>
+    document.getElementById('scanButton').addEventListener('click', async () => {
+      try {
+        const device = await navigator.bluetooth.requestDevice({ filters: [{ services: ['heart_rate'] }] });
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService('heart_rate');
+        const characteristic = await service.getCharacteristic('heart_rate_measurement');
+        const value = await characteristic.readValue();
+        console.log('Heart rate:', value.getUint8(0));
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+</html>
